@@ -253,9 +253,12 @@ class ContentExtractor:
         return output
     
 
-    def save_extracted_content(self):
+    def save_extracted_content(self, outputFilePath):
         """
         Saves the extracted content to the output file.
+        
+        Args:
+        - outputFilePath: Path of the CSV where the data needs to be appended/saved.
         """
 
         #Extracting all business details
@@ -283,6 +286,6 @@ class ContentExtractor:
             )
             
             #Appending to the output file
-            with open('output.csv', 'a', newline='') as file:
+            with open(outputFilePath, 'a', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow(output_dictionary.values())
