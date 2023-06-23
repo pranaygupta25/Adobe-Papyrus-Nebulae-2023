@@ -48,7 +48,8 @@ class PDFDataExtractor:
     
     def set_ExtractPDF_options(self, options= None):
         
-        #If not passed as an argument, build ExtractPDF options as per requirements of the Papyrus Nebulae 2023 
+        #If not passed as an argument, build ExtractPDF options as per requirements of the 
+        #Papyrus Nebulae 2023 
         if(not options):
             options: ExtractPDFOptions = ExtractPDFOptions.builder() \
                 .with_elements_to_extract([ExtractElementType.TEXT, ExtractElementType.TABLES]) \
