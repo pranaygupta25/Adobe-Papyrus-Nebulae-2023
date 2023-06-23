@@ -4,12 +4,19 @@ import os
 
 
 def setup_output_csv(output_file_path):
-    
+    """
+    Sets up a new CSV file for output.
+
+    Args:
+    - output_file_path: The path to the output CSV file.
+    """
+
     #Checking and removing if an older output file exists
     if os.path.isfile(output_file_path):
         print('Existing file found.\nRemoving existing file...')
         os.remove(output_file_path)
 
+    #Headers for the CSV as required by the challenge guidelines
     headers = [
         'Bussiness__City',
         'Bussiness__Country',
@@ -32,6 +39,7 @@ def setup_output_csv(output_file_path):
         'Invoice__Tax'
     ]
 
+    #Writing the headers to the output CSV
     with open(output_file_path, 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(headers)
@@ -39,6 +47,12 @@ def setup_output_csv(output_file_path):
 
 
 def delete_directory(directory_path):
+    """
+    Deletes a directory and its contents.
+
+    Args:
+    - directory_path: The path to the directory to be deleted.
+    """
     for root, dirs, files in os.walk(directory_path, topdown=False):
         for file in files:
             file_path = os.path.join(root, file)
