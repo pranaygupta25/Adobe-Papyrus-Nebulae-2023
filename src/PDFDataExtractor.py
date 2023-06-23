@@ -18,6 +18,13 @@ class PDFDataExtractor:
     
 
     def __init__(self, inputFile, outputZipFile):
+        """
+        Initialize the PDFDataExtractor.
+
+        Args:
+        - inputFile (str): Path to the input PDF file.
+        - outputZipFile (str): Path to save the extracted data as a ZIP file.
+        """
 
         self.input_file = inputFile
         self.output_zip_file = outputZipFile
@@ -27,6 +34,12 @@ class PDFDataExtractor:
 
 
     def set_credentials(self, credentialFile):
+        """
+        Set the API credentials for authentication.
+
+        Args:
+        - credentialFile (str): Path to the API credentials JSON file.
+        """
 
         self.api_credentials_JSON = credentialFile
 
@@ -40,6 +53,9 @@ class PDFDataExtractor:
 
         
     def initialize_operation(self):
+        """
+        Initialize the extraction operation by setting the input file.
+        """
 
         #Set operation input from a source file.
         source = FileRef.create_from_local_file(self.input_file)
@@ -47,7 +63,14 @@ class PDFDataExtractor:
 
     
     def set_ExtractPDF_options(self, options= None):
-        
+        """
+        Set the options for the PDF extraction operation.
+
+        Args:
+        - options: Optional. Options for the extraction operation.
+        If not provided, default options will be used.
+        """
+
         #If not passed as an argument, build ExtractPDF options as per requirements of the 
         #Papyrus Nebulae 2023 
         if(not options):
@@ -62,6 +85,9 @@ class PDFDataExtractor:
 
     
     def extract(self):
+        """
+        Execute the PDF extraction operation and save the result.
+        """
 
         #Execute the actual extraction operation
         result: FileRef = self.extract_pdf_operation.execute(self.execution_context)
@@ -71,5 +97,9 @@ class PDFDataExtractor:
 
     
     def cleanup(self):
+        """
+        Clean up the extracted data by removing the output ZIP file.
+        """
+        
         if os.path.isfile(self.output_zip_file):
             os.remove(self.output_zip_file)
