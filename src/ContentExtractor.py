@@ -32,7 +32,7 @@ class ContentExtractor:
         
         self.business_name = None
         self.business_description = None
-        self.tax = None
+        self.tax = 10
 
     
     def __construct_dictionary(self, keys: list, values: list) -> dict:
