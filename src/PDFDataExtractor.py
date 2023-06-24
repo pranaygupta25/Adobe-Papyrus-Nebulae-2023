@@ -78,6 +78,7 @@ class PDFDataExtractor:
                 .with_elements_to_extract([ExtractElementType.TEXT, ExtractElementType.TABLES]) \
                 .with_table_structure_format(TableStructureType.CSV) \
                 .with_include_styling_info(True) \
+                .with_get_char_info(True) \
                 .build()
         
         #Set options into the operation
