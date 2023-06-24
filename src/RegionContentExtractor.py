@@ -71,10 +71,23 @@ class RegionContentExtractor():
 
         content = []
         #Text is added to the output only if it is present inside the region boundaries
-        if(element['Page'] == 0 and \
+        if('Page' in element.keys() and element['Page'] == 0 and \
            self.__is_inside_bounds(element['Bounds'], region)):
-            if('Text' in element.keys()):
-                content.append(element['Text'])
+            if('Text' in element.keys() and 'CharBounds' in element.keys()):
+                text = element['Text']
+                charBounds = element['CharBounds']
+
+                #Extracting line-wise text based on bottom bounds of characters
+                line = ''
+                lastBottom = charBounds[0][1]
+                for char, bound in zip(text, charBounds):
+                    if bound[1] == lastBottom:
+                        line += char
+                    else:
+                        content.append(line)
+                        line = str(char)
+                        lastBottom = bound[1]
+                content.append(line)
         
         return content
     
