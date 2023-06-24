@@ -20,12 +20,13 @@ class ContentExtractor:
         """
 
         self.folder_path = folder
-        self.input_file = open(f'{folder}/structuredData.json')
         self.output_file_path = f'output.csv'
-
+        self.input_file = open(f'{folder}/structuredData.json')
         self.data = json.load(self.input_file)
         self.input_file.close()
-        self.bill_table = pd.read_csv(f'{folder}/tables/fileoutpart2.csv', header=None, dtype=str)
+
+        self.bill_table = None
+        self.tables_name = None
 
         self.region_content_extractor = RegionContentExtractor(self.data)
         
@@ -56,7 +57,7 @@ class ContentExtractor:
         #strings. The Extract API often adds whitespaces at the end of texts. 
         output = dict()
         for i, key in enumerate(keys):
-            output[key] = values[i].strip()
+            output[key] = str(values[i]).strip()
         
         return output
     
@@ -73,10 +74,9 @@ class ContentExtractor:
         Returns:
         - dict: Dictionary containing the extracted business details.
         """
-
         # address format: 'Name StreetAddress, City, Country Zipcode '
-        address.remove(name)
         address = ''.join(address)
+        address = address[len(name):]
 
         # address format: 'StreetAddress, City, Country Zipcode '
         # Zipcode is a 5 digit code and the string ends with a space
@@ -203,6 +203,7 @@ class ContentExtractor:
 
         titleFlag = False
         taxFlag = False
+        tableFlag = False
 
         for element in self.data['elements']:
             
@@ -217,8 +218,9 @@ class ContentExtractor:
             #The element immediately after the element with text as 'Tax % ' contains the tax value
             for component in components:
                 if taxFlag and 'Text' in component.keys():
-                    taxFlag = False
-                    self.tax = component['Text']
+                    if '$' not in component['Text']:
+                        taxFlag = False
+                        self.tax = component['Text']
                 if 'Text' in component.keys() and component['Text'] == 'Tax % ':
                     taxFlag = True
 
@@ -226,10 +228,20 @@ class ContentExtractor:
             if titleFlag:
                 self.business_description = element['Text']
                 titleFlag = False
-            if element['Path'].endswith('/Title'):
+            if 'TextSize' in element.keys() and element['TextSize'] > 24:
                 self.business_name = element['Text']
                 titleFlag = True
 
+            #Extracting the bill tables
+            if 'attributes' in element.keys():
+                if 'NumCol' in element['attributes'].keys():
+                    if element['attributes']['NumCol'] == 4:
+                        if tableFlag:
+                            self.tables_name = element['filePaths']
+                            tableFlag = False
+                        else:
+                            tableFlag = True
+            
 
     def __create_output_dictionary(self, businessDetails, customerDetails, invoiceDetails):
         """
@@ -273,19 +285,21 @@ class ContentExtractor:
         customerData = self.region_content_extractor.get_customer_data()
         customer_details = self.__get_customer_details(customerData)
 
-        #Iterating over item rows in the invoice
-        for index, row in self.bill_table.iterrows():
-            #Extracting all invoice details
-            invoiceData = self.region_content_extractor.get_invoice_data()
-            invoice_details = self.__get_ivoice_details(row, self.tax, **invoiceData)
+        for table in self.tables_name:
+            self.bill_table = pd.read_csv(f'{self.folder_path}/{table}', header=None, dtype=str)
+            #Iterating over item rows in the invoice
+            for index, row in self.bill_table.iterrows():
+                #Extracting all invoice details
+                invoiceData = self.region_content_extractor.get_invoice_data()
+                invoice_details = self.__get_ivoice_details(row, self.tax, **invoiceData)
 
-            output_dictionary = self.__create_output_dictionary(
-                business_details, 
-                customer_details, 
-                invoice_details
-            )
-            
-            #Appending to the output file
-            with open(outputFilePath, 'a', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(output_dictionary.values())
+                output_dictionary = self.__create_output_dictionary(
+                    business_details, 
+                    customer_details, 
+                    invoice_details
+                )
+                
+                #Appending to the output file
+                with open(outputFilePath, 'a', newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerow(output_dictionary.values())
