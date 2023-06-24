@@ -3,7 +3,8 @@ from zipfile import ZipFile
 
 from src.ContentExtractor import ContentExtractor
 from src.PDFDataExtractor import PDFDataExtractor
-from src.utils import setup_output_csv, delete_directory as cleanup
+from src.utils.functions import setup_output_csv, delete_directory as cleanup
+from src.utils.colors import *
 
 
 
@@ -27,7 +28,7 @@ if __name__ == '__main__':
     #Iterating over files in the input directory
     for index, filename in enumerate(os.listdir(input_folder_path)):
 
-        print(f'Processing File {index+1:>4}/{num_files:<4}: {filename}')
+        print(f'{yellow}{index+1:>4}/{num_files:<4}\t {filename:<13}\t\t Processing{reset}', end='')
         
         file = os.path.join(input_folder_path, filename)
         if os.path.isfile(file):
@@ -51,5 +52,7 @@ if __name__ == '__main__':
             content_extractor.save_extracted_content(output_file_path)
             #Deleting the intermediate directory with contents
             cleanup(intermediate)
+
+        print(f'\r{green}{index+1:>4}/{num_files:<4}\t {filename:<13}\t\t Processed {reset}')
     
     print(f'All {num_files} files extracted successfully!')
